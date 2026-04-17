@@ -1,0 +1,9 @@
+#load-balancer.yml
+---
+haproxy_bind_ip: "{{ node_IP }}"
+LOAD_BALANCER_DNS: "loadbalancer.{{ cluster_domain }}"  # DNS name of the load balancer
+LOAD_BALANCER_PORT: "6443"                # Port of the load balancer
+haproxy_maxconn: 2000
+haproxy_timeout_connect: "10s"
+haproxy_timeout_client: "1m"
+haproxy_timeout_server: "1m"

@@ -1,0 +1,4 @@
+#all.yml
+---
+ansible_user: admin
+cluster_domain: k8s-cluster.local

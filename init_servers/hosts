@@ -1,7 +1,0 @@
-[new_servers]
-server1 ansible_host=192.168.1.14 ansible_user=nour ansible_ssh_password="{{ vault_server1_ssh_pass }}" ansible_become_pass="{{ vault_server1_sudo_pass }}"
-;server2 ansible_host=192.168.1.16 ansible_user=nour ansible_ssh_password="{{ vault_server2_ssh_pass }}" ansible_become_pass="{{ vault_server2_sudo_pass }}"
-
-[new_servers:vars]
-ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-new_ansible_user=ansible-admin

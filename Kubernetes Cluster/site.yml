@@ -1,0 +1,86 @@
+# site.yml
+- name: manage kubernetes cluster
+  hosts: all
+  roles:
+    - role: common  # Always runs
+      tags: build
+
+- name: prepere lb for kubernetes cluster masters
+  gather_facts: false
+  hosts: load-balancer
+  roles:
+    - role: ha_proxy_lb
+      tags: build  
+
+- name: prepere kubernetes nodes workers and masters
+  hosts: kube_cluster
+  gather_facts: false
+  roles:
+    - role: swap_manage
+      tags: build
+    - role: containerd
+      tags: build
+    - role: k8s_packages
+      tags: build
+
+
+- name: cluster initialization 
+  any_errors_fatal: true
+  hosts: bootstrap_master
+  gather_facts: false
+  roles:
+    - role: cluster_init
+      tags: build   
+
+
+- name: join kubernetes cluster
+  any_errors_fatal: true
+  hosts: worker-nodes
+  gather_facts: false
+  roles:
+    - role: cluster_join_workers
+      tags: build
+
+- name: join kubernetes  master to cluster 
+  any_errors_fatal: true
+  hosts: master-nodes
+  gather_facts: false
+  roles:
+    - role: cluster_join_masters
+      tags: build
+
+
+- name: add admin user to kubernetes masters
+  any_errors_fatal: true
+  hosts: master-nodes
+  gather_facts: false
+  roles:
+    - role: k8s_admin
+      tags: build
+
+- name:  cluster network
+  any_errors_fatal: true
+  hosts: bootstrap_master
+  gather_facts: false
+  roles:
+    - role: cluster_network
+      tags: build
+    - role: cluster_status
+      tags: build  
+
+- name: update kubernetes cluster
+  hosts: kube_cluster
+  serial: 1  # This makes Ansible run on one host at a time
+  order: sorted  # Process hosts in inventory order
+  roles:
+    
+    - role: upgrade_k8s_cluster
+      tags: upgrade
+
+
+- name: remove kubernetes cluster
+  hosts: kube_cluster
+  gather_facts: false
+  roles:
+    - role: remove_k8s_cluster
+      tags: remove

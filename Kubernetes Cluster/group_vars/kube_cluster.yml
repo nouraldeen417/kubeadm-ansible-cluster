@@ -1,0 +1,9 @@
+#kube_cluster.yml
+---
+HOME_USER: "{{ ansible_user }}"           # existing username not root
+POD_NETWORK_CIDR: "10.244.0.0/16"         # Pod network CIDR for cluster network (flannel)
+kubernetes_version: "v1.32"               # Kubernetes version to install
+Updated_version: "v1.33"                  # Update cluster to this version
+package_version: "1.33.1-1.1"             # Package version to install
+kubeadm_version: "v1.33.1"                # kubeadm version to install
+cni_manifest: "https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml"

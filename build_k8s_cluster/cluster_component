@@ -1,4 +1,0 @@
-192.168.57.3  master-01.k8s.local master-01
-192.168.57.4  master-02.k8s.local master-02
-192.168.57.5  worker-01.k8s.local worker-01
-192.168.57.10 lb-api-01.k8s.local     lb-01	

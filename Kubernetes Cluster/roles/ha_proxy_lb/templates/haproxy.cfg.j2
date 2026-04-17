@@ -1,0 +1,24 @@
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    daemon
+    maxconn {{ haproxy_maxconn }}
+
+defaults
+    log     global
+    mode    tcp
+    option  tcplog
+    timeout connect {{ haproxy_timeout_connect }}
+    timeout client  {{ haproxy_timeout_client }}
+    timeout server  {{ haproxy_timeout_server }}
+
+frontend kubernetes-api
+    bind {{ haproxy_bind_ip }}:{{ LOAD_BALANCER_PORT }}
+    default_backend control-plane-nodes
+
+backend control-plane-nodes
+    balance roundrobin
+    option tcp-check
+{% for host in groups['master-nodes'] %}
+    server {{ host }} {{hostvars[host]['node_IP'] }}:{{ LOAD_BALANCER_PORT }} check
+{% endfor %}

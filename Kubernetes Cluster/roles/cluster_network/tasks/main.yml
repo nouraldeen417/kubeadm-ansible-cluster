@@ -1,0 +1,7 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Apply cni manifest to the cluster.
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ cni_manifest }}"
+    kubeconfig: "/home/{{ HOME_USER }}/.kube/config"

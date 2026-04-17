@@ -1,0 +1,23 @@
+[bootstrap_master]
+master1
+
+[master-nodes]
+master1
+master2
+
+[worker-nodes]
+worker1
+
+[load-balancer]
+loadbalancer
+
+[kube_cluster:children]
+bootstrap_master
+master-nodes
+worker-nodes
+
+[all]
+master1          ansible_host=192.168.56.11  node_IP=192.168.56.11
+master2          ansible_host=192.168.56.12  node_IP=192.168.56.12
+worker1          ansible_host=192.168.56.13  node_IP=192.168.56.13
+loadbalancer     ansible_host=192.168.56.10  node_IP=192.168.56.10

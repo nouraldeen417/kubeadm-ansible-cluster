@@ -1,0 +1,58 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/containerd
+# Set ip forwarding on in /proc and in the sysctl file and reload if necessary
+- name: Ensure standard k8s kernel modules are loaded
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+
+- name: Persist k8s kernel modules on reboot
+  copy:
+    dest: /etc/modules-load.d/k8s.conf
+    content: |
+      overlay
+      br_netfilter
+
+- name: Configure sysctl parameters for Kubernetes networking
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/k8s.conf
+    sysctl_set: true
+    state: present
+    reload: true
+  loop:
+    - { key: 'net.bridge.bridge-nf-call-iptables', value: '1' }
+    - { key: 'net.bridge.bridge-nf-call-ip6tables', value: '1' }
+    - { key: 'net.ipv4.ip_forward', value: '1' }
+    
+- name: Add Docker GPG key 
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker repository (Debian/Ubuntu)
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    state: present
+    update_cache: yes  # Runs apt update after adding repo
+
+- name: Install containerd (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name: "{{ docker_packages }}"
+    state: present
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+    src: config.toml
+    dest: /etc/containerd/config.toml
+    mode: '0644'    
+  notify: Restart service containerd # Notify handler to restart containerd
+
+- name: Force all notified handlers to run at this point, not waiting for normal sync points
+  ansible.builtin.meta: flush_handlers  
+  
+    

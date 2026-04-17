@@ -1,0 +1,33 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/cluster_init
+- name: Run command with arguments 
+  ansible.builtin.command:
+    cmd: >
+      kubeadm init 
+      --apiserver-advertise-address={{ node_IP }}
+      {% if LOAD_BALANCER_DNS is defined %}
+      --control-plane-endpoint={{ LOAD_BALANCER_DNS }}:{{ LOAD_BALANCER_PORT }}
+      {% else %}
+      --control-plane-endpoint={{ node_IP }}
+      {% endif %}
+      {% if POD_NETWORK_CIDR is defined %}
+      --pod-network-cidr={{ POD_NETWORK_CIDR }}
+      {% endif %}
+      --upload-certs
+  args:
+    creates: /etc/kubernetes/admin.conf
+
+- name: Generate join command
+  command: kubeadm token create --print-join-command
+  register: join_cmd
+
+- name: Upload certs
+  command: kubeadm init phase upload-certs --upload-certs
+  register: cert_key_raw
+
+- name: Save variables
+  set_fact:
+    worker_join: "{{ join_cmd.stdout }}"
+    cert_key: "{{ cert_key_raw.stdout_lines[-1] }}"
+    master_join: "{{ join_cmd.stdout }} --control-plane --certificate-key {{ cert_key_raw.stdout_lines[-1] }}"

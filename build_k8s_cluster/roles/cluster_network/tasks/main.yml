@@ -1,7 +1,0 @@
-#SPDX-License-Identifier: MIT-0
----
-- name: Apply weave net manifest to the cluster.
-  kubernetes.core.k8s:
-    state: present
-    src: https://reweave.azurewebsites.net/k8s/v1.32/net.yaml
-    kubeconfig: "/home/{{ HOME_USER }}/.kube/config"
